@@ -7,32 +7,45 @@
  This example code is in the public domain.
  */
 
-int leds[] = {9, 10, 11};
-int bright[];
-int fade[];
-int led = 9;           // the pin that the LED is attached to
-int brightness = 0;    // how bright the LED is
-int fadeAmount = 5;    // how many points to fade the LED by
+const int LEDNUM = 6;
+const int SLEEPINTERVAL = 1;
+
+int leds[] = {3, 5, 6, 9, 10, 11};
+int brightness[LEDNUM];
+int fade[LEDNUM];
+int sleep[LEDNUM];
 
 // the setup routine runs once when you press reset:
 void setup()  { 
-  for (int i = 0; i < 3; i++) {
+  randomSeed(analogRead(0));
+  for (int i = 0; i < LEDNUM; i++) {
     pinMode(leds[i], OUTPUT);
+    brightness[i] = 0;
+    fade[i] = 15;
+    sleep[i] = random(10);
   }
 } 
 
 // the loop routine runs over and over again forever:
-void loop()  { 
-  // set the brightness of pin 9:
-  analogWrite(led, brightness);    
-
-  // change the brightness for next time through the loop:
-  brightness = brightness + fadeAmount;
-
-  // reverse the direction of the fading at the ends of the fade: 
-  if (brightness == 0 || brightness == 255) {
-    fadeAmount = -fadeAmount ; 
-  }     
+void loop()  {
+  for (int i = 0; i < LEDNUM; i++)
+  {
+    if (sleep[i] > 0) {
+      sleep[i] = sleep[i] - SLEEPINTERVAL;
+    } else {
+      brightness[i] = brightness[i] + fade[i];
+      if (brightness[i] < 0) {
+        brightness[i] = 0;
+        sleep[i] = random(1000);
+        fade[i] = -fade[i];
+      }
+      if (brightness[i] > 254) {
+        brightness[i] = 254;
+        fade[i] = -fade[i];
+      }
+      analogWrite(leds[i], brightness[i]);
+    }
+  }
   // wait for 30 milliseconds to see the dimming effect    
   delay(30);                            
 }
